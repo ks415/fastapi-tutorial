@@ -70,26 +70,37 @@ function App() {
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
           placeholder="新しいタスクを入力してください"
-          onKeyPress={(e) => e.key === "Enter" && createTask()}
+          onKeyDown={(e) => e.key === "Enter" && createTask()}
+          aria-label="新しいタスクの入力"
         />
-        <button onClick={createTask}>追加</button>
+        <button onClick={createTask} aria-label="タスクを追加">
+          追加
+        </button>
       </div>
 
-      <div className="task-list">
+      <div className="task-list" role="list">
         {tasks.length === 0 ? (
           <div className="task-item" style={{ justifyContent: "center" }}>
             タスクがありません。新しいタスクを追加してください！
           </div>
         ) : (
           tasks.map((task) => (
-            <div key={task.id} className="task-item">
+            <div key={task.id} className="task-item" role="listitem">
               <input
                 type="checkbox"
                 checked={task.done}
                 onChange={() => toggleDone(task.id, task.done)}
+                aria-label={`${task.title}を${
+                  task.done ? "未完了" : "完了"
+                }にする`}
               />
               <span className={task.done ? "done" : ""}>{task.title}</span>
-              <button onClick={() => deleteTask(task.id)}>削除</button>
+              <button
+                onClick={() => deleteTask(task.id)}
+                aria-label={`${task.title}を削除`}
+              >
+                削除
+              </button>
             </div>
           ))
         )}
