@@ -7,7 +7,7 @@
 - FastAPI
 - SQLAlchemy
 - MySQL
-- Poetry
+- UV
 - Docker
 
 ### フロントエンド
@@ -53,5 +53,31 @@ docker-compose up frontend
 ## テストの実行
 
 ```bash
-docker-compose run --rm backend poetry run pytest
+docker-compose run --rm backend uv run pytest
+```
+
+## ローカル開発 (UV を使用)
+
+1. UV のインストール:
+
+```bash
+pip install uv
+```
+
+2. 依存関係のインストール:
+
+```bash
+uv sync
+```
+
+3. アプリケーションの実行:
+
+```bash
+uv run uvicorn api.main:app --reload
+```
+
+4. テストの実行:
+
+```bash
+uv run pytest
 ```

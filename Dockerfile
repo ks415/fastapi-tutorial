@@ -4,15 +4,20 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /src
 
-# pipを使ってpoetryをインストール
-RUN pip install poetry
+# pipを使ってuvをインストール
+RUN pip install uv
 
-# poetryの定義ファイルをコピー (存在する場合)
-COPY pyproject.toml* poetry.lock* ./
+# uvの定義ファイルをコピー
+COPY pyproject.toml ./
+COPY uv.lock ./
+COPY README.md ./
 
-# poetryでライブラリをインストール (pyproject.tomlが既にある場合)
-RUN poetry config virtualenvs.in-project true
-RUN if [ -f pyproject.toml ]; then poetry install --no-root; fi
+# uvでライブラリをインストール
+RUN uv sync
+
+# アプリケーションコードをコピー
+COPY api/ ./api/
+COPY tests/ ./tests/
 
 # uvicornのサーバーを立ち上げる
-ENTRYPOINT ["poetry", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--reload"]
+ENTRYPOINT ["uv", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--reload"]
