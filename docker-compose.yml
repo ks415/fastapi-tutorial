@@ -1,14 +1,17 @@
 services:
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: api/Dockerfile
     volumes:
-      - .dockervenv:/src/.venv
-      - .:/src
+      - ./api:/app/api
+      - ./tests:/app/tests
+      - .dockervenv:/app/.venv
     ports:
       - 8000:8000
   db:
     image: mysql:8.0
-    platform: Linux/x86_64
+    platform: linux/x86_64
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: "demo"
@@ -23,8 +26,8 @@ services:
       context: .
       dockerfile: app-front/Dockerfile
     volumes:
-      - ./app-front:/app-front
-      - /app-front/node_modules
+      - ./app-front:/app
+      - /app/node_modules
     ports:
       - 3000:3000
 volumes:

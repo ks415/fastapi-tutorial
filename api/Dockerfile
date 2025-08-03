@@ -8,9 +8,7 @@ WORKDIR /src
 RUN pip install uv
 
 # uvの定義ファイルをコピー
-COPY pyproject.toml ./
-COPY uv.lock ./
-COPY README.md ./
+COPY pyproject.toml uv.lock README.md ./
 
 # uvでライブラリをインストール
 RUN uv sync
