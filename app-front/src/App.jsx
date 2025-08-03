@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
+import { useAuth } from "./AuthContext";
+import Login from "./Login";
 import "./App.css";
 
 function App() {
@@ -7,20 +9,36 @@ function App() {
   const [newTask, setNewTask] = useState("");
   const baseUrl = "http://localhost:8000";
 
+  const { user, token, logout, loading } = useAuth();
+
+  // 認証ヘッダーを含むaxiosのデフォルト設定
+  useEffect(() => {
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common["Authorization"];
+    }
+  }, [token]);
+
   // タスク一覧を取得
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       const response = await axios.get(`${baseUrl}/tasks`);
       setTasks(response.data);
     } catch (error) {
       console.error("Error fetching tasks:", error);
+      if (error.response?.status === 401) {
+        logout();
+      }
     }
-  };
+  }, [baseUrl, logout]);
 
   // 初回読み込み時にタスク一覧を取得
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    if (user && token) {
+      fetchTasks();
+    }
+  }, [user, token, fetchTasks]);
 
   // 新しいタスクを作成
   const createTask = async () => {
@@ -33,6 +51,9 @@ function App() {
       fetchTasks();
     } catch (error) {
       console.error("Error creating task:", error);
+      if (error.response?.status === 401) {
+        logout();
+      }
     }
   };
 
@@ -47,6 +68,9 @@ function App() {
       fetchTasks();
     } catch (error) {
       console.error("Error toggling done status:", error);
+      if (error.response?.status === 401) {
+        logout();
+      }
     }
   };
 
@@ -57,12 +81,39 @@ function App() {
       fetchTasks();
     } catch (error) {
       console.error("Error deleting task:", error);
+      if (error.response?.status === 401) {
+        logout();
+      }
     }
   };
 
+  // ローディング中の表示
+  if (loading) {
+    return (
+      <div className="App">
+        <div style={{ textAlign: "center", padding: "2rem" }}>
+          読み込み中...
+        </div>
+      </div>
+    );
+  }
+
+  // 未認証の場合はログイン画面を表示
+  if (!user) {
+    return <Login />;
+  }
+
   return (
     <div className="App">
-      <h1>TODOリスト</h1>
+      <div className="header">
+        <h1>TODOリスト</h1>
+        <div className="user-info">
+          <span>ようこそ、{user.username}さん</span>
+          <button onClick={logout} className="logout-button">
+            ログアウト
+          </button>
+        </div>
+      </div>
 
       <div className="task-form">
         <input
